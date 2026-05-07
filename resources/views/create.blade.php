@@ -16,18 +16,37 @@
                             </div>
                         </div>
 
-                      
+                      @if ($errors->any())
+                          <div class="alert alert-danger">
+                              <ul class="mb-0">
+                                  @foreach ($errors->all() as $error)
+                                      <li>{{ $error }}</li>
+                                  @endforeach
+                              </ul>
+                          </div>
+                      @endif
 
                         <div class="">
                             <form action="{{ route('post.store') }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="title" class="form-label">Title</label>
-                                    <input type="text" class="form-control" id="title" name="title" required>
+                                    <input type="text" value="{{ old('title') }}" class="form-control @error('title') is-invalid
+
+                                    @enderror" id="title" name="title" >
+                                    @error('title')
+                                        <div class="text-danger invalid-feedback">{{ $message }}</div>
+
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                                    <textarea class="form-control @error('description') is-invalid
+
+                                    @enderror" id="description" value="{{ old('description') }}" name="description" rows="4" ></textarea>
+                                    @error('description')
+                                        <div class="text-danger invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="text-end">
                                 <button type="submit" class="btn btn-primary">Submit</button>

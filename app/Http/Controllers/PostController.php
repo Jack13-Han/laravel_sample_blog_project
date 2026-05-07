@@ -4,67 +4,105 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $posts=Post::all();
+        $posts=Post::paginate(4);
         return view('index', compact('posts'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         return view('create');
     }
 
-    public function store(Request $request){
-        $post=new Post();
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // $posts=new Post();
+        // $posts->title=$request->title;
+        // $posts->description=$request->description;
+        // $posts->save();
+
+        // Validator::make($request->all(),[
+        //     'title'=>'required',
+        //     'description'=>'required'
+        // ])->validate();
+
+        $request->validate([
+            'title'=>'required|unique:posts,title,min:10',
+            'description'=>'required|min:20'
+        ]);
+
+        Post::create([
+            'title'=>$request->title,
+            'description'=>$request->description
+        ]);
+
+        // Post::create($request->all());
+
+
+
+        return redirect()->route('post.index')->with('success','Post created successfully.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        return view('show',[
+            'post'=>Post::findOrFail($id)
+
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        return view('edit',[
+            'post'=>Post::findOrFail($id)
+
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $post=Post::findOrFail($id);
+        // $post->update($request->all());
         $post->title=$request->title;
         $post->description=$request->description;
-        $post->save();
+        $post->update();
 
-        return redirect()->route('post.index')->with('success', 'Post created successfully.');
+        return redirect()->route('post.index')->with('success','Post updated successfully.');
     }
 
-    public function show($id){
-        $post=Post::find($id);
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
 
-        if(!$post){
-            return redirect()->route('post.index');
-        }
-        return view('show', compact('post'));
+    // Post::destroy($id);
 
-    }
-
-    public function destroy($id){
-
-        $post=Post::find($id);
-        if($post){
-            $post->delete();
-        }
-        return redirect()->route('post.index')->with('success', 'Post deleted successfully.');
-    }
-
-    public function edit($id){
-        $post=Post::find($id);
-        if(!$post){
-            return redirect()->route('post.index');
-        }
-        return view('edit', compact('post'));
-    }
-
-    public function update(Request $request, $id){
-        $post=Post::find($id);
-        if(!$post){
-            return redirect()->route('post.index');
-        }
-        $post->title=$request->title;
-        $post->description=$request->description;
-        $post->created_at=now();
-        $post->updated_at=now();
-        $post->save();
-
-        return redirect()->route('post.index')->with('success', 'Post updated successfully.');
+        $post=Post::findOrFail($id);
+        $post->delete();
+        return redirect()->route('post.index')->with('success','Post deleted successfully.');
     }
 }
